@@ -1,0 +1,58 @@
+---
+import PostCard from "@components/PostCard.astro";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSortedPosts } from "@utils/content-utils";
+import { getPostUrlBySlug } from "@utils/url-utils";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths = (async () => {
+	const allPosts = await getSortedPosts();
+
+	const seriesMap: Record<string, typeof allPosts> = {};
+	for (const post of allPosts) {
+		const series = post.data.series;
+		if (!series) continue;
+		if (!seriesMap[series]) seriesMap[series] = [];
+		seriesMap[series].push(post);
+	}
+
+	return Object.entries(seriesMap).map(([series, posts]) => ({
+		params: { series },
+		props: { posts, series },
+	}));
+}) satisfies GetStaticPaths;
+
+const { posts, series } = Astro.props;
+
+let delay = 0;
+const interval = 50;
+---
+
+<MainGridLayout title={series}>
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32 mb-4">
+        <div class="card-base z-10 px-9 py-4 relative w-full flex items-center gap-3">
+            <div class="font-bold text-2xl text-75">{series}</div>
+            <div class="text-sm text-black/40 dark:text-white/40">
+                {posts.length} {posts.length === 1 ? "post" : "posts"}
+            </div>
+        </div>
+    </div>
+    <div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
+        {posts.map((entry) => (
+            <PostCard
+                entry={entry}
+                title={entry.data.title}
+                tags={entry.data.tags}
+                category={entry.data.category}
+                published={entry.data.published}
+                updated={entry.data.updated}
+                url={getPostUrlBySlug(entry.slug)}
+                image={entry.data.image}
+                description={entry.data.description}
+                draft={entry.data.draft}
+                class:list="onload-animation"
+                style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms);`}
+            />
+        ))}
+    </div>
+</MainGridLayout>
