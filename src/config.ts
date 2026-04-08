@@ -46,25 +46,25 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.About,
 		{
 			name: "GitHub",
-			url: "https://github.com/Tessa1217/", 
-			external: true, 
+			url: "https://github.com/Tessa1217/",
+			external: true,
 		},
 		{
 			name: "Portfolio",
 			url: "https://portfolio-six-indol-86.vercel.app/",
-			external: true
-		}
+			external: true,
+		},
 	],
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "assets/images/my-avatar.jpg", 
+	avatar: "assets/images/my-avatar.jpg",
 	name: "권유진(Tessa)",
 	bio: "4년차 프론트엔드 개발자입니다. 개인적으로 공부한 개발 지식, 프로젝트에서의 경험, 후기, 자격증 학습 내용 등을 공유하고 있습니다.",
 	links: [
 		{
 			name: "Linkedin",
-			icon: "fa6-brands:linkedin", 
+			icon: "fa6-brands:linkedin",
 			url: "https://www.linkedin.com/in/tessayujin/",
 		},
 		{
@@ -73,10 +73,10 @@ export const profileConfig: ProfileConfig = {
 			url: "https://github.com/Tessa1217/",
 		},
 		{
-			name : "Portfolio",
+			name: "Portfolio",
 			icon: "fa6-solid:link",
-			url: "https://portfolio-six-indol-86.vercel.app/"
-		}
+			url: "https://portfolio-six-indol-86.vercel.app/",
+		},
 	],
 };
 
