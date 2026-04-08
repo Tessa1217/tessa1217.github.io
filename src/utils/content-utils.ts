@@ -1,7 +1,7 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
-import { getCategoryUrl } from "@utils/url-utils.ts";
+import { getCategoryUrl, getSeriesUrl } from "@utils/url-utils.ts";
 
 // // Retrieve posts and sort them by publication date
 async function getRawSortedPosts() {
@@ -77,6 +77,30 @@ export type Category = {
 	count: number;
 	url: string;
 };
+
+export type Series = {
+	name: string;
+	count: number;
+	url: string;
+};
+
+export async function getSeriesList(): Promise<Series[]> {
+	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
+		return import.meta.env.PROD ? data.draft !== true : true;
+	});
+	const count: { [key: string]: number } = {};
+	allBlogPosts.forEach((post: { data: { series: string | null } }) => {
+		if (!post.data.series) return;
+		const seriesName = post.data.series.trim();
+		count[seriesName] = count[seriesName] ? count[seriesName] + 1 : 1;
+	});
+
+	const lst = Object.keys(count).sort((a, b) =>
+		a.toLowerCase().localeCompare(b.toLowerCase()),
+	);
+
+	return lst.map((s) => ({ name: s, count: count[s], url: getSeriesUrl(s) }));
+}
 
 export async function getCategoryList(): Promise<Category[]> {
 	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {

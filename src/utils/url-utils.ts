@@ -21,6 +21,11 @@ export function getTagUrl(tag: string): string {
 	return url(`/archive/?tag=${encodeURIComponent(tag.trim())}`);
 }
 
+export function getSeriesUrl(series: string | null): string {
+	if (!series || series.trim() === "") return url("/archive/");
+	return url(`/archive/?series=${encodeURIComponent(series.trim())}`);
+}
+
 export function getCategoryUrl(category: string | null): string {
 	if (
 		!category ||

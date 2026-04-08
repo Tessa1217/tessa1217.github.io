@@ -1,59 +1,65 @@
-name: Bug Report
-description: Create a report to help us improve
-title: "[Bug]: "
+name: 🐛 버그 리포트
+description: 버그나 오류를 발견했을 때 사용하세요.
+title: "[Bug] "
 labels: ["bug"]
 assignees:
-  - L4Ph
-  - saicaca
+  - Tessa1217
+
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this bug report!
+        버그를 제보해 주셔서 감사합니다! 가능한 한 자세히 작성해 주시면 빠르게 확인할 수 있습니다.
+
   - type: textarea
-    id: bug-description
+    id: description
     attributes:
-      label: Describe the bug
-      description: A clear and concise description of what the bug is.
+      label: 버그 설명
+      description: 어떤 문제가 발생했나요?
+      placeholder: 버그에 대해 명확하게 설명해 주세요.
     validations:
       required: true
+
   - type: textarea
-    id: to-reproduce
+    id: steps
     attributes:
-      label: To Reproduce
-      description: Steps to reproduce the behavior.
+      label: 재현 방법
+      description: 버그를 재현하는 단계를 순서대로 작성해 주세요.
       placeholder: |
-        1. Go to '...'
-        2. Click on '....'
-        3. Scroll down to '....'
-        4. See error
+        1. '...' 페이지로 이동
+        2. '...' 클릭
+        3. 오류 발생
     validations:
       required: true
+
   - type: textarea
-    id: expected-behavior
+    id: expected
     attributes:
-      label: Expected behavior
-      description: A clear and concise description of what you expected to happen.
+      label: 예상 동작
+      description: 원래 어떻게 동작해야 하나요?
     validations:
       required: true
-  - type: dropdown
-    id: os
-    attributes:
-      label: OS
-      multiple: true
-      options:
-        - Windows
-        - macOS
-        - Linux
-        - Android
-        - iOS
-  - type: input
-    id: browser
-    attributes:
-      label: Browser
-      placeholder: e.g. chrome, safari
+
   - type: textarea
-    id: additional-context
+    id: actual
     attributes:
-      label: Additional context
-      description: Add any other context about the problem here.
+      label: 실제 동작
+      description: 실제로 어떻게 동작하고 있나요?
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 환경 정보
+      description: 브라우저, OS 등 환경 정보를 입력해 주세요.
+      placeholder: |
+        - OS: macOS 14 / Windows 11
+        - 브라우저: Chrome 120 / Safari 17
+        - 화면 크기: 1440px
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 스크린샷 또는 추가 정보
+      description: 관련 스크린샷이나 보충 설명이 있다면 첨부해 주세요.

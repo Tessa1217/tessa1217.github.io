@@ -1,0 +1,174 @@
+---
+import type { MarkdownHeading } from "astro";
+import { Icon } from "astro-icon/components";
+import { siteConfig } from "../../config";
+import { url } from "../../utils/url-utils";
+
+interface Props {
+	headings: MarkdownHeading[];
+}
+
+const { headings = [] } = Astro.props;
+const isPostsRoute = Astro.url.pathname.startsWith(url("/posts/"));
+
+if (!isPostsRoute || !siteConfig.toc.enable || headings.length === 0) return;
+
+let minDepth = 10;
+for (const heading of headings) {
+	minDepth = Math.min(minDepth, heading.depth);
+}
+
+const maxLevel = siteConfig.toc.depth;
+const filteredHeadings = headings.filter((h) => h.depth < minDepth + maxLevel);
+
+const removeTailingHash = (text: string) => {
+	const idx = text.lastIndexOf("#");
+	return idx === text.length - 1 ? text.substring(0, idx) : text;
+};
+---
+
+<!-- sm: bottom sheet / md~xl: floating panel / 2xl+: sidebar TOC -->
+
+<!-- sm bottom sheet (hidden on md+) -->
+<div id="toc-sheet-container" class="fixed bottom-0 left-0 right-0 z-50 flex sm:flex md:hidden flex-col pointer-events-none">
+    <!-- backdrop -->
+    <div id="toc-sheet-backdrop"
+         class="hidden fixed inset-0 bg-black/30 pointer-events-auto"
+         onclick="closeTocSheet()"
+    ></div>
+
+    <!-- sheet panel -->
+    <div id="toc-sheet-panel"
+         class="pointer-events-auto relative z-10 card-base rounded-t-[var(--radius-large)] shadow-xl
+                max-h-[60vh] overflow-y-auto translate-y-full transition-transform duration-300 px-4 pt-3 pb-6"
+    >
+        <div class="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 mx-auto mb-3"></div>
+        <div class="text-xs font-bold text-50 px-2 mb-2">목차</div>
+        {filteredHeadings.map((heading) => (
+            <a href={`#${heading.slug}`}
+               class="toc-entry px-2 flex gap-2 relative transition w-full min-h-8 rounded-xl
+                      hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-1.5"
+               onclick="closeTocSheet()"
+            >
+                <div class:list={["transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold",
+                    {
+                        "bg-[var(--toc-badge-bg)] text-[var(--btn-content)]": heading.depth === minDepth,
+                        "ml-4": heading.depth === minDepth + 1,
+                        "ml-8": heading.depth === minDepth + 2,
+                    }
+                ]}>
+                    {heading.depth === minDepth + 1 && <div class="w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"></div>}
+                    {heading.depth === minDepth + 2 && <div class="w-1.5 h-1.5 rounded-sm bg-black/5 dark:bg-white/10"></div>}
+                </div>
+                <div class:list={["transition text-sm truncate min-w-0 flex-1", {
+                    "text-50": heading.depth <= minDepth + 1,
+                    "text-30": heading.depth === minDepth + 2,
+                }]}>
+                    {removeTailingHash(heading.text)}
+                </div>
+            </a>
+        ))}
+    </div>
+
+    <!-- toggle button for sm -->
+    <button id="toc-sheet-btn"
+            aria-label="Toggle Table of Contents"
+            class="pointer-events-auto self-end mr-4 mb-4 btn-card w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg text-[var(--primary)] transition active:scale-90"
+    >
+        <Icon name="material-symbols:format-list-bulleted-rounded" class="text-xl"></Icon>
+    </button>
+</div>
+
+<!-- md~xl floating panel (hidden on sm and 2xl+) -->
+<div id="toc-float-container" class="fixed bottom-24 right-4 z-50 hidden md:flex 2xl:hidden flex-col items-end gap-2">
+    <div id="toc-float-panel"
+         class="hidden w-72 max-h-[60vh] overflow-y-auto card-base rounded-[var(--radius-large)] shadow-lg p-3 flex-col gap-1"
+    >
+        <div class="text-xs font-bold text-50 px-2 py-1 mb-1">목차</div>
+        {filteredHeadings.map((heading) => (
+            <a href={`#${heading.slug}`}
+               class="toc-entry px-2 flex gap-2 relative transition w-full min-h-8 rounded-xl
+                      hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-1.5"
+               onclick="closeTocFloat()"
+            >
+                <div class:list={["transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold",
+                    {
+                        "bg-[var(--toc-badge-bg)] text-[var(--btn-content)]": heading.depth === minDepth,
+                        "ml-4": heading.depth === minDepth + 1,
+                        "ml-8": heading.depth === minDepth + 2,
+                    }
+                ]}>
+                    {heading.depth === minDepth + 1 && <div class="w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"></div>}
+                    {heading.depth === minDepth + 2 && <div class="w-1.5 h-1.5 rounded-sm bg-black/5 dark:bg-white/10"></div>}
+                </div>
+                <div class:list={["transition text-sm truncate min-w-0 flex-1", {
+                    "text-50": heading.depth <= minDepth + 1,
+                    "text-30": heading.depth === minDepth + 2,
+                }]}>
+                    {removeTailingHash(heading.text)}
+                </div>
+            </a>
+        ))}
+    </div>
+
+    <button id="toc-float-btn"
+            aria-label="Toggle Table of Contents"
+            class="btn-card w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg text-[var(--primary)] transition active:scale-90"
+    >
+        <Icon name="material-symbols:format-list-bulleted-rounded" class="text-xl"></Icon>
+    </button>
+</div>
+
+<script is:inline>
+(function () {
+    // sm: bottom sheet
+    const sheetBtn = document.getElementById("toc-sheet-btn");
+    const sheetPanel = document.getElementById("toc-sheet-panel");
+    const sheetBackdrop = document.getElementById("toc-sheet-backdrop");
+
+    function closeTocSheet() {
+        if (!sheetPanel || !sheetBackdrop) return;
+        sheetPanel.classList.add("translate-y-full");
+        sheetPanel.classList.remove("translate-y-0");
+        sheetBackdrop.classList.add("hidden");
+    }
+
+    if (sheetBtn && sheetPanel && sheetBackdrop) {
+        sheetBtn.addEventListener("click", () => {
+            const isOpen = !sheetPanel.classList.contains("translate-y-full");
+            if (isOpen) {
+                closeTocSheet();
+            } else {
+                sheetPanel.classList.remove("translate-y-full");
+                sheetPanel.classList.add("translate-y-0");
+                sheetBackdrop.classList.remove("hidden");
+            }
+        });
+    }
+
+    // md+: floating panel
+    const floatBtn = document.getElementById("toc-float-btn");
+    const floatPanel = document.getElementById("toc-float-panel");
+
+    function closeTocFloat() {
+        if (!floatPanel) return;
+        floatPanel.classList.add("hidden");
+        floatPanel.classList.remove("flex");
+    }
+
+    if (floatBtn && floatPanel) {
+        floatBtn.addEventListener("click", () => {
+            const isHidden = floatPanel.classList.contains("hidden");
+            floatPanel.classList.toggle("hidden", !isHidden);
+            floatPanel.classList.toggle("flex", isHidden);
+        });
+
+        document.addEventListener("click", (e) => {
+            const container = document.getElementById("toc-float-container");
+            if (container && !container.contains(e.target)) {
+                closeTocFloat();
+            }
+        });
+    }
+})();
+</script>

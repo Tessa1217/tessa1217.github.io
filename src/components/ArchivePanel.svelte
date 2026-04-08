@@ -7,11 +7,13 @@ import { getPostUrlBySlug } from "../utils/url-utils";
 
 export let tags: string[] = [];
 export let categories: string[] = [];
+export let series: string[] = [];
 export let sortedPosts: Post[] = [];
 
 const params = new URLSearchParams(window.location.search);
 tags = params.has("tag") ? params.getAll("tag") : [];
 categories = params.has("category") ? params.getAll("category") : [];
+series = params.has("series") ? params.getAll("series") : [];
 const uncategorized = params.get("uncategorized");
 
 interface Post {
@@ -20,6 +22,7 @@ interface Post {
 		title: string;
 		tags: string[];
 		category?: string | null;
+		series?: string | null;
 		published: Date;
 	};
 }
@@ -60,6 +63,12 @@ onMount(async () => {
 
 	if (uncategorized) {
 		filteredPosts = filteredPosts.filter((post) => !post.data.category);
+	}
+
+	if (series.length > 0) {
+		filteredPosts = filteredPosts.filter(
+			(post) => post.data.series && series.includes(post.data.series),
+		);
 	}
 
 	const grouped = filteredPosts.reduce(
