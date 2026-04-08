@@ -3,6 +3,8 @@ title: ⚖️ AWS ELB (Elastic Load Balancer) & ASG (Auto Scaling Group)
 published: 2026-03-18
 tags: [AWS, Cloud, Certificates]
 category: AWS
+series: AWS Certification
+image: /images/aws.webp
 draft: false
 ---
 # ⚖️ AWS ELB (Elastic Load Balancer) & ASG (Auto Scaling Group)

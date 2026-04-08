@@ -3,6 +3,8 @@ title: 💾 AWS Storage
 published: 2026-03-18
 tags: [AWS, Cloud, Certificates]
 category: AWS
+series: AWS Certification
+image: /images/aws.webp
 draft: false
 ---
 # 💾 AWS Storage

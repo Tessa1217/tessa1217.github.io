@@ -1,0 +1,93 @@
+---
+import path from "node:path";
+import ImageWrapper from "@components/misc/ImageWrapper.astro";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSortedPosts } from "@utils/content-utils";
+import { getDir, url } from "@utils/url-utils";
+
+const allPosts = await getSortedPosts();
+
+type SeriesEntry = {
+	name: string;
+	count: number;
+	cover: string;
+	basePath: string;
+};
+
+const seriesMap: Record<string, SeriesEntry> = {};
+for (const post of allPosts) {
+	const series = post.data.series;
+	if (!series) continue;
+	if (!seriesMap[series]) {
+		seriesMap[series] = {
+			name: series,
+			count: 0,
+			cover: post.data.image || "",
+			basePath: path.join("content/posts/", getDir(post.id)),
+		};
+	}
+	seriesMap[series].count++;
+	// 커버 이미지가 없으면 다음 포스트 이미지로 대체
+	if (!seriesMap[series].cover && post.data.image) {
+		seriesMap[series].cover = post.data.image;
+		seriesMap[series].basePath = path.join("content/posts/", getDir(post.id));
+	}
+}
+
+const seriesList = Object.values(seriesMap).sort((a, b) =>
+	a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+);
+---
+
+<MainGridLayout title={i18n(I18nKey.series)}>
+    <div class="flex flex-col w-full rounded-[var(--radius-large)] gap-4 mb-4">
+        {seriesList.map((s) => (
+            <a href={url(`/series/${encodeURIComponent(s.name)}/`)}
+               class="group card-base flex flex-row w-full rounded-[var(--radius-large)] overflow-hidden relative h-52"
+            >
+                <!-- info -->
+                <div class="pl-6 md:pl-9 pr-6 md:pr-2 py-6 w-full md:w-[calc(100%_-_var(--coverWidth)_-_12px)]">
+                    <div class="font-bold text-2xl text-90 mb-2
+                        group-hover:text-[var(--primary)] dark:group-hover:text-[var(--primary)] transition">
+                        {s.name}
+                    </div>
+                    <div class="text-sm text-black/40 dark:text-white/40">
+                        {s.count} {s.count === 1 ? i18n(I18nKey.postCount) : i18n(I18nKey.postsCount)}
+                    </div>
+                </div>
+
+                <!-- thumbnail (right side) -->
+                {s.cover
+                    ? <div class="group hidden sm:block sm:w-[var(--coverWidth)] absolute top-3 bottom-3 right-3 rounded-xl overflow-hidden active:scale-95">
+                        <div class="absolute pointer-events-none z-10 w-full h-full group-hover:bg-black/20 transition"></div>
+                        <ImageWrapper
+                            src={s.cover}
+                            basePath={s.basePath}
+                            alt={s.name}
+                            class="w-full h-full"
+                        />
+                      </div>
+                    : <div class="hidden md:flex md:w-[var(--coverWidth)] absolute top-3 bottom-3 right-3 rounded-xl overflow-hidden
+                            items-center justify-center bg-[var(--btn-plain-bg)]">
+                        <div class="font-bold text-3xl text-[var(--primary)] opacity-60">
+                            {s.name.charAt(0).toUpperCase()}
+                        </div>
+                      </div>
+                }
+            </a>
+        ))}
+        {seriesList.length === 0 && (
+            <div class="card-base text-center text-black/30 dark:text-white/30 py-12">
+                No series yet.
+            </div>
+        )}
+    </div>
+</MainGridLayout>
+
+<style>
+:root {
+    --coverWidth: 28%;
+}
+</style>

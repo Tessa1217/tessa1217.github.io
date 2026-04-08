@@ -3,6 +3,8 @@ title: 🔐 AWS S3 Security
 published: 2026-03-20
 tags: [AWS, Cloud, Certificates]
 category: AWS
+series: AWS Certification
+image: /images/aws.webp
 draft: false
 ---
 # 🔐 AWS S3 Security

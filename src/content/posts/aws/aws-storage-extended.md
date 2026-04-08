@@ -3,6 +3,8 @@ title: 🗄️ AWS Storage — Extended Services
 published: 2026-03-21
 tags: [AWS, Cloud, Certificates]
 category: AWS
+series: AWS Certification
+image: /images/aws.webp
 draft: false
 ---
 # 🗄️ AWS Storage — Extended Services
