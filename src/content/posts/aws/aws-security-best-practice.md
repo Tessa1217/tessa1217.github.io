@@ -3,6 +3,8 @@ title: 🔐 IAM Security Best Practices
 published: 2026-03-27
 tags: [AWS, Cloud, Certificates]
 category: AWS
+series: AWS Certification
+image: /images/aws.webp
 draft: false
 ---
 # 🔐 IAM Security Best Practices

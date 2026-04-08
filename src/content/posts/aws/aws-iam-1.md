@@ -3,6 +3,8 @@ title: 🔐 AWS IAM (Identity and Access Management)
 published: 2026-03-14
 tags: [AWS, Cloud, Certificates]
 category: AWS
+series: AWS Certification
+image: /images/aws.webp
 draft: false
 ---
 # 🔐 AWS IAM (Identity and Access Management)

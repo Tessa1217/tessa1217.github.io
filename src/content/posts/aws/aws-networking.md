@@ -3,6 +3,8 @@ title: 🌐 AWS Networking — VPC
 published: 2026-03-23
 tags: [AWS, Cloud, Certificates]
 category: AWS
+series: AWS Certification
+image: /images/aws.webp
 draft: false
 ---
 # 🌐 AWS Networking — VPC

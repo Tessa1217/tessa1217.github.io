@@ -3,6 +3,8 @@ title: 🪣 Amazon S3 (Simple Storage Service)
 published: 2026-03-19
 tags: [AWS, Cloud, Certificates]
 category: AWS
+series: AWS Certification
+image: /images/aws.webp
 draft: false
 ---
 # 🪣 Amazon S3 (Simple Storage Service)

@@ -3,6 +3,8 @@ title: 📨 AWS Integration & Messaging
 published: 2026-03-22
 tags: [AWS, Cloud, Certificates]
 category: AWS
+series: AWS Certification
+image: /images/aws.webp
 draft: false
 ---
 # 📨 AWS Integration & Messaging
