@@ -29,18 +29,18 @@ const removeTailingHash = (text: string) => {
 
 <!-- sm: bottom sheet / md~xl: floating panel / 2xl+: sidebar TOC -->
 
-<!-- sm bottom sheet (hidden on md+) -->
-<div id="toc-sheet-container" class="fixed bottom-0 left-0 right-0 z-50 flex sm:flex md:hidden flex-col pointer-events-none">
-    <!-- backdrop -->
+<!-- sm bottom sheet: single container with md:hidden ensures reliable responsive hiding -->
+<div id="toc-sheet-container" class="fixed bottom-0 left-0 right-0 z-50 flex flex-col md:hidden pointer-events-none">
+    <!-- backdrop: fixed, outside flex flow -->
     <div id="toc-sheet-backdrop"
          class="hidden fixed inset-0 bg-black/30 pointer-events-auto"
          onclick="closeTocSheet()"
     ></div>
 
-    <!-- sheet panel -->
+    <!-- panel: absolute so it doesn't affect container height, slides up when open -->
     <div id="toc-sheet-panel"
-         class="pointer-events-auto relative z-10 card-base rounded-t-[var(--radius-large)] shadow-xl
-                max-h-[60vh] overflow-y-auto translate-y-full transition-transform duration-300 px-4 pt-3 pb-6"
+         class="pointer-events-auto absolute bottom-0 left-0 right-0 card-base rounded-t-[var(--radius-large)] shadow-xl
+                max-h-[60vh] overflow-y-auto overscroll-contain translate-y-full transition-transform duration-300 px-4 pt-3 pb-6"
     >
         <div class="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 mx-auto mb-3"></div>
         <div class="text-xs font-bold text-50 px-2 mb-2">목차</div>
@@ -70,10 +70,10 @@ const removeTailingHash = (text: string) => {
         ))}
     </div>
 
-    <!-- toggle button for sm -->
+    <!-- button: relative z-20 keeps it above the panel in stacking order -->
     <button id="toc-sheet-btn"
             aria-label="Toggle Table of Contents"
-            class="pointer-events-auto self-end mr-4 mb-4 btn-card w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg text-[var(--primary)] transition active:scale-90"
+            class="pointer-events-auto relative z-20 self-end mr-4 mb-4 btn-card w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg text-[var(--primary)] transition active:scale-90"
     >
         <Icon name="material-symbols:format-list-bulleted-rounded" class="text-xl"></Icon>
     </button>
@@ -126,22 +126,40 @@ const removeTailingHash = (text: string) => {
     const sheetPanel = document.getElementById("toc-sheet-panel");
     const sheetBackdrop = document.getElementById("toc-sheet-backdrop");
 
-    function closeTocSheet() {
+    // position:fixed scroll lock — prevents body scroll without blocking child overflow scroll
+    var _sheetScrollY = 0;
+    function lockBodyScroll() {
+        _sheetScrollY = window.scrollY;
+        document.body.style.position = "fixed";
+        document.body.style.top = "-" + _sheetScrollY + "px";
+        document.body.style.width = "100%";
+    }
+    function unlockBodyScroll() {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, _sheetScrollY);
+    }
+
+    // Exposed globally so inline onclick attributes can call them
+    window.closeTocSheet = function () {
         if (!sheetPanel || !sheetBackdrop) return;
         sheetPanel.classList.add("translate-y-full");
         sheetPanel.classList.remove("translate-y-0");
         sheetBackdrop.classList.add("hidden");
-    }
+        unlockBodyScroll();
+    };
 
     if (sheetBtn && sheetPanel && sheetBackdrop) {
         sheetBtn.addEventListener("click", () => {
             const isOpen = !sheetPanel.classList.contains("translate-y-full");
             if (isOpen) {
-                closeTocSheet();
+                window.closeTocSheet();
             } else {
                 sheetPanel.classList.remove("translate-y-full");
                 sheetPanel.classList.add("translate-y-0");
                 sheetBackdrop.classList.remove("hidden");
+                lockBodyScroll();
             }
         });
     }
@@ -150,11 +168,12 @@ const removeTailingHash = (text: string) => {
     const floatBtn = document.getElementById("toc-float-btn");
     const floatPanel = document.getElementById("toc-float-panel");
 
-    function closeTocFloat() {
+    // Exposed globally so inline onclick attributes can call them
+    window.closeTocFloat = function () {
         if (!floatPanel) return;
         floatPanel.classList.add("hidden");
         floatPanel.classList.remove("flex");
-    }
+    };
 
     if (floatBtn && floatPanel) {
         floatBtn.addEventListener("click", () => {
@@ -166,7 +185,7 @@ const removeTailingHash = (text: string) => {
         document.addEventListener("click", (e) => {
             const container = document.getElementById("toc-float-container");
             if (container && !container.contains(e.target)) {
-                closeTocFloat();
+                window.closeTocFloat();
             }
         });
     }
