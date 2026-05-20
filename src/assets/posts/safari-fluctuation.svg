@@ -1,0 +1,109 @@
+<svg viewBox="0 0 480 175" xmlns="http://www.w3.org/2000/svg" width="100%">
+
+  <!-- card background -->
+  <rect x="0" y="0" width="480" height="175" rx="12" fill="#F8F7F4" stroke="#D3D1C7" stroke-width="0.5"/>
+
+  <!-- label -->
+  <text x="20" y="20" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="10.5" fill="#888780">before fix — slow network에서 재현되는 fluctuation 현상</text>
+
+  <!-- flex row background (height animated) -->
+  <rect x="16" y="28" width="448" height="52" rx="8" fill="#FFFFFF" stroke="#D3D1C7" stroke-width="0.5">
+    <animate attributeName="height" values="52;52;88;88;52;52"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- icon: circle → tall pill (aspect-ratio ignored) -->
+  <rect x="28" y="36" width="32" height="32" rx="16" fill="#B5D4F4">
+    <animate attributeName="height" values="32;32;68;68;32;32"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- red dashed outline on icon (appears during stretch) -->
+  <rect x="27" y="35" width="34" height="34" rx="17" fill="none"
+    stroke="#E24B4A" stroke-width="1.5" stroke-dasharray="3 2" opacity="0">
+    <animate attributeName="height" values="34;34;70;70;34;34"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0"
+      keyTimes="0;0.25;0.37;0.57;0.68;1" dur="5s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- "로딩 중..." (appears during stretch) -->
+  <text x="44" y="103" text-anchor="middle"
+    font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+    font-size="9" fill="#185FA5" opacity="0">로딩 중…
+    <animate attributeName="opacity" values="0;0;1;1;0;0"
+      keyTimes="0;0.28;0.40;0.56;0.66;1" dur="5s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- name & subtitle (static) -->
+  <text x="72" y="52"
+    font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+    font-size="13" font-weight="500" fill="#2C2C2A">홍길동</text>
+  <text x="72" y="68"
+    font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+    font-size="10.5" fill="#888780">프론트엔드 개발자</text>
+
+  <!-- chip: #frontend -->
+  <rect x="16" y="92" width="80" height="22" rx="11" fill="#E6F1FB" stroke="#B5D4F4" stroke-width="0.5">
+    <animate attributeName="y" values="92;92;128;128;92;92"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </rect>
+  <text x="56" y="107" text-anchor="middle"
+    font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+    font-size="10.5" fill="#0C447C">#frontend
+    <animate attributeName="y" values="107;107;143;143;107;107"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- chip: #safari -->
+  <rect x="104" y="92" width="62" height="22" rx="11" fill="#FAECE7" stroke="#F5C4B3" stroke-width="0.5">
+    <animate attributeName="y" values="92;92;128;128;92;92"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </rect>
+  <text x="135" y="107" text-anchor="middle"
+    font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+    font-size="10.5" fill="#712B13">#safari
+    <animate attributeName="y" values="107;107;143;143;107;107"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- chip: #css -->
+  <rect x="174" y="92" width="46" height="22" rx="11" fill="#E1F5EE" stroke="#9FE1CB" stroke-width="0.5">
+    <animate attributeName="y" values="92;92;128;128;92;92"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </rect>
+  <text x="197" y="107" text-anchor="middle"
+    font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+    font-size="10.5" fill="#085041">#css
+    <animate attributeName="y" values="107;107;143;143;107;107"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- chip: #vue -->
+  <rect x="228" y="92" width="44" height="22" rx="11" fill="#EAF3DE" stroke="#C0DD97" stroke-width="0.5">
+    <animate attributeName="y" values="92;92;128;128;92;92"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </rect>
+  <text x="250" y="107" text-anchor="middle"
+    font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+    font-size="10.5" fill="#27500A">#vue
+    <animate attributeName="y" values="107;107;143;143;107;107"
+      keyTimes="0;0.22;0.38;0.58;0.70;1" dur="5s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- annotation: displacement indicator (appears during stretch) -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;0;1;1;0;0"
+      keyTimes="0;0.32;0.43;0.56;0.66;1" dur="5s" repeatCount="indefinite"/>
+    <line x1="312" y1="92" x2="312" y2="128" stroke="#E24B4A" stroke-width="1" stroke-dasharray="2.5 2"/>
+    <line x1="307" y1="92"  x2="317" y2="92"  stroke="#E24B4A" stroke-width="1.5"/>
+    <line x1="307" y1="128" x2="317" y2="128" stroke="#E24B4A" stroke-width="1.5"/>
+    <text x="322" y="108"
+      font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+      font-size="9.5" fill="#E24B4A">36px</text>
+    <text x="322" y="121"
+      font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+      font-size="9.5" fill="#E24B4A">밀림</text>
+  </g>
+
+</svg>
