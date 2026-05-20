@@ -28,7 +28,8 @@ const specCollection = defineCollection({
 	schema: z.object({}),
 });
 
-export const collections = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const collections: Record<string, any> = {
 	posts: postsCollection,
 	spec: specCollection,
 };
