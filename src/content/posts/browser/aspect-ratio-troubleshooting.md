@@ -1,8 +1,9 @@
 ---
 title: aspect-ratio Troubleshooting on Safari
 published: 2026-04-23
-tags: [Browser, Image, Javascript, Safari, Chrome]
+tags: [Browser, Troubleshooting, Image, Javascript, Safari, Chrome]
 category: Browser
+series: Troubleshooting Notes
 draft: false
 ---
 
