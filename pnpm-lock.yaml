@@ -11854,7 +11854,7 @@ snapshots:
       aria-query: 5.3.1
       axobject-query: 4.1.0
       clsx: 2.1.1
-      devalue: 5.8.1
+      devalue: 5.7.1
       esm-env: 1.2.2
       esrap: 2.2.9(@typescript-eslint/types@8.58.1)
       is-reference: 3.0.3
