@@ -669,45 +669,139 @@ pipelines:
 
 ### 시나리오: 안정 버전 `1.5.0`에서 두 feature 병렬 진행
 
+#### 전체 타임라인
+
+```mermaid
+timeline
+    title 두 feature 병렬 베타 진행 → 정식 출시 흐름
+    T0 (시작) : 안정 버전 1.5.0 출시
+    T1 : refactoring 베타 시작
+       : Publish 1.5.1-refactoring.beta.0
+       : dist-tag refactoring-beta
+    T2 : grid 베타 시작 (병렬)
+       : Publish 1.6.0-grid.beta.0
+       : dist-tag grid-beta
+       : ✅ 충돌 없음
+    T3 : refactoring 추가 수정
+       : Publish 1.5.1-refactoring.beta.1
+    T4 : refactoring 정식 출시
+       : Publish 1.5.1
+       : dist-tag latest
+    T5 : grid 정식 출시
+       : Publish 1.6.0
+       : dist-tag latest
+    T6 (선택) : feature dist-tag 정리
 ```
-[T0] 안정 버전: @yourorg/lib@1.5.0
 
-[T1] refactoring feature (버그픽스 성격) 베타 시작
-    publish_beta { FEATURE_NAME=refactoring, BETA_TARGET=patch }
-    → Registry 조회: 1.5.1-refactoring.beta.* 없음
-    → Publish: 1.5.1-refactoring.beta.0
-    → dist-tag: refactoring-beta
+#### 시점별 상세 흐름 (sequence diagram)
 
-[T2] grid feature (새 기능 성격) 베타 시작 — refactoring과 병렬
-    publish_beta { FEATURE_NAME=grid, BETA_TARGET=minor }
-    → Registry 조회: 1.6.0-grid.beta.* 없음
-    → Publish: 1.6.0-grid.beta.0
-    → dist-tag: grid-beta
-    ✅ 충돌 없음
+작업자, Bitbucket Pipeline, npm Registry, Git 사이의 상호작용을 시점별로 표현한다.
 
-[T3] refactoring 추가 수정
-    publish_beta { FEATURE_NAME=refactoring, BETA_TARGET=patch }
-    → Registry 조회: 1.5.1-refactoring.beta.0 발견, max=0
-    → Publish: 1.5.1-refactoring.beta.1
-    → dist-tag: refactoring-beta (덮어쓰기)
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Dev as 작업자
+    participant Pipe as Bitbucket Pipeline
+    participant Reg as npm Private Registry
+    participant Git as Git Repository
 
-[T4] refactoring 머지 후 정식 출시
-    publish_patch
-    → package.json은 여전히 1.5.0 (베타가 commit되지 않았으므로)
-    → npm version patch → 1.5.1
-    → Publish: 1.5.1
-    → dist-tag: latest
+    Note over Reg: 시작 상태: @yourorg/lib@1.5.0 (latest)
 
-[T5] grid 머지 후 정식 출시
-    publish_minor
-    → package.json은 1.5.1 (refactoring patch 반영)
-    → npm version minor → 1.6.0
-    → Publish: 1.6.0
-    → dist-tag: latest
+    rect rgb(240, 248, 255)
+        Note over Dev,Git: T1 — refactoring 베타 시작 (patch 타겟)
+        Dev->>Pipe: publish_beta { FEATURE_NAME=refactoring, BETA_TARGET=patch }
+        Pipe->>Reg: npm view versions (prefix: 1.5.1-refactoring.beta.)
+        Reg-->>Pipe: 매칭 없음 → build=0
+        Pipe->>Pipe: npm version 1.5.1-refactoring.beta.0 --no-git-tag-version
+        Pipe->>Reg: npm publish --tag refactoring-beta
+        Reg-->>Pipe: ✅ 1.5.1-refactoring.beta.0 published
+        Note over Git: Git에 commit 없음 (베타는 history 미기록)
+    end
 
-[T6 / 선택] dist-tag 정리
-    npm dist-tag rm @yourorg/lib refactoring-beta
-    npm dist-tag rm @yourorg/lib grid-beta
+    rect rgb(255, 248, 240)
+        Note over Dev,Git: T2 — grid 베타 시작 (minor 타겟, refactoring과 병렬)
+        Dev->>Pipe: publish_beta { FEATURE_NAME=grid, BETA_TARGET=minor }
+        Pipe->>Reg: npm view versions (prefix: 1.6.0-grid.beta.)
+        Reg-->>Pipe: 매칭 없음 → build=0
+        Pipe->>Pipe: npm version 1.6.0-grid.beta.0 --no-git-tag-version
+        Pipe->>Reg: npm publish --tag grid-beta
+        Reg-->>Pipe: ✅ 1.6.0-grid.beta.0 published (충돌 없음)
+    end
+
+    rect rgb(240, 248, 255)
+        Note over Dev,Git: T3 — refactoring 추가 수정
+        Dev->>Pipe: publish_beta { FEATURE_NAME=refactoring, BETA_TARGET=patch }
+        Pipe->>Reg: npm view versions (prefix: 1.5.1-refactoring.beta.)
+        Reg-->>Pipe: [...beta.0] → max=0, build=1
+        Pipe->>Reg: npm publish 1.5.1-refactoring.beta.1 --tag refactoring-beta
+        Reg-->>Pipe: ✅ 1.5.1-refactoring.beta.1 published (dist-tag 덮어쓰기)
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Dev,Git: T4 — refactoring 머지 후 정식 출시
+        Dev->>Pipe: publish_patch
+        Note over Pipe: package.json은 여전히 1.5.0<br/>(베타가 commit되지 않았으므로)
+        Pipe->>Pipe: npm version patch → 1.5.1
+        Pipe->>Reg: npm publish (dist-tag: latest)
+        Reg-->>Pipe: ✅ 1.5.1 published
+        Pipe->>Git: git push --follow-tags
+    end
+
+    rect rgb(240, 255, 240)
+        Note over Dev,Git: T5 — grid 머지 후 정식 출시
+        Dev->>Pipe: publish_minor
+        Note over Pipe: package.json: 1.5.1 (refactoring 반영)
+        Pipe->>Pipe: npm version minor → 1.6.0
+        Pipe->>Reg: npm publish (dist-tag: latest)
+        Reg-->>Pipe: ✅ 1.6.0 published
+        Pipe->>Git: git push --follow-tags
+    end
+
+    rect rgb(248, 248, 248)
+        Note over Dev,Reg: T6 (선택) — feature dist-tag 정리
+        Dev->>Reg: npm dist-tag rm @yourorg/lib refactoring-beta
+        Dev->>Reg: npm dist-tag rm @yourorg/lib grid-beta
+    end
+```
+
+#### Registry 상태 변화
+
+각 시점에 npm registry에 어떤 버전과 dist-tag가 존재하는지를 추적한다.
+
+```mermaid
+flowchart TB
+    subgraph T0["T0 — 시작"]
+        T0V["📦 versions: [1.5.0]"]
+        T0T["🏷️ latest → 1.5.0"]
+    end
+
+    subgraph T1["T1 — refactoring 베타"]
+        T1V["📦 versions:<br/>1.5.0<br/>1.5.1-refactoring.beta.0"]
+        T1T["🏷️ latest → 1.5.0<br/>refactoring-beta → 1.5.1-refactoring.beta.0"]
+    end
+
+    subgraph T2["T2 — grid 베타 (병렬)"]
+        T2V["📦 versions:<br/>1.5.0<br/>1.5.1-refactoring.beta.0<br/>1.6.0-grid.beta.0"]
+        T2T["🏷️ latest → 1.5.0<br/>refactoring-beta → ...beta.0<br/>grid-beta → 1.6.0-grid.beta.0"]
+    end
+
+    subgraph T4["T4 — refactoring 출시"]
+        T4V["📦 versions:<br/>1.5.0, 1.5.1<br/>1.5.1-refactoring.beta.0/1<br/>1.6.0-grid.beta.0"]
+        T4T["🏷️ latest → 1.5.1<br/>refactoring-beta → ...beta.1<br/>grid-beta → ...beta.0"]
+    end
+
+    subgraph T5["T5 — grid 출시"]
+        T5V["📦 versions:<br/>1.5.0, 1.5.1, 1.6.0<br/>(베타들 그대로 유지)"]
+        T5T["🏷️ latest → 1.6.0<br/>refactoring-beta → ...beta.1<br/>grid-beta → ...beta.0"]
+    end
+
+    T0 --> T1 --> T2 --> T4 --> T5
+
+    style T0 fill:#f5f5f5
+    style T1 fill:#e3f2fd
+    style T2 fill:#fff3e0
+    style T4 fill:#e8f5e9
+    style T5 fill:#e8f5e9
 ```
 
 ### 컨슈머 측 사용 예시
@@ -753,10 +847,6 @@ npm install @yourorg/lib@refactoring-beta
 - 옵션 A: 머지 후 수동으로 `npm dist-tag rm` (가장 간단)
 - 옵션 B: `publish_patch` / `publish_minor` 스크립트에 "최근 6개월 이상 미사용 dist-tag 자동 제거" 로직 추가
 - 옵션 C: 분기별 점검 (`npm dist-tag ls @yourorg/lib`) 루틴화
-
-### 4. Registry 조회 권한
-
-`npm view <pkg> versions`는 .npmrc에 인증 토큰이 있어야 한다. 위 파이프라인은 step 시작에 이미 토큰을 .npmrc에 쓰므로 문제 없음. Private registry라면 토큰에 read 권한이 포함되어 있는지 확인 필요.
 
 ---
 
