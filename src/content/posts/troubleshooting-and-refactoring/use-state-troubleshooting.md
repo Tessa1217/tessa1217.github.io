@@ -3,7 +3,7 @@ title: 🐛 Nuxt SSR 환경에서 `useState`에 함수 저장 시 발생한 Seri
 published: 2026-05-21
 tags: [Nuxt, Vue, SSR, Troubleshooting]
 category: Troubleshooting
-series: Troubleshooting Notes
+series: Troubleshooting & Refactoring Notes
 image: /images/nuxt.webp
 draft: false
 ---
@@ -37,13 +37,13 @@ Nuxt 3의 `useState`는 SSR → CSR 전달 과정에서 payload를 직렬화(ser
 
 ## 📌 개요
 
-| 항목 | 내용 |
-|---|---|
-| 환경 | Nuxt 3, Vue 3 (Composition API), SSR |
-| 영향 범위 | 새로고침 플로팅 버튼이 동작하는 모든 라우트 |
+| 항목      | 내용                                                           |
+| --------- | -------------------------------------------------------------- |
+| 환경      | Nuxt 3, Vue 3 (Composition API), SSR                           |
+| 영향 범위 | 새로고침 플로팅 버튼이 동작하는 모든 라우트                    |
 | 발생 조건 | 페이지 직접 진입(URL 입력) 또는 브라우저 새로고침 (= SSR 경로) |
-| 해결 방식 | `import.meta.server` 가드로 서버 측 registry 등록 차단 |
-| 소요 시간 | (작성 시 채우기) |
+| 해결 방식 | `import.meta.server` 가드로 서버 측 registry 등록 차단         |
+| 소요 시간 | (작성 시 채우기)                                               |
 
 ---
 
@@ -82,20 +82,20 @@ Nuxt 3의 `useState`는 SSR → CSR 전달 과정에서 payload를 직렬화(ser
 ```ts
 // ❌ Before — 서버에서도 함수가 useState에 등록됨
 const registry = useState<Record<string, () => Promise<void>>>(
-  'refresh-registry',
-  () => ({})
-)
+  "refresh-registry",
+  () => ({}),
+);
 
 export function useRegisterRefresh(key: string, fn: () => Promise<void>) {
-  registry.value[key] = fn // ← SSR 페이로드 직렬화 시 폭발
+  registry.value[key] = fn; // ← SSR 페이로드 직렬화 시 폭발
 }
 ```
 
 ```ts
 // ✅ After — 서버에서는 등록 자체를 스킵
 export function useRegisterRefresh(key: string, fn: () => Promise<void>) {
-  if (import.meta.server) return // 🛡️ SSR 가드
-  registry.value[key] = fn
+  if (import.meta.server) return; // 🛡️ SSR 가드
+  registry.value[key] = fn;
 }
 ```
 
@@ -130,10 +130,10 @@ export function useRegisterRefresh(key: string, fn: () => Promise<void>) {
 
 ```ts
 // composables/useRefreshRegistry.ts
-const registry = ref<Record<string, () => Promise<void>>>({}) // 모듈 스코프
+const registry = ref<Record<string, () => Promise<void>>>({}); // 모듈 스코프
 
 export function useRefreshRegistry() {
-  return { registry, register, refreshAll }
+  return { registry, register, refreshAll };
 }
 ```
 
@@ -146,16 +146,16 @@ export function useRefreshRegistry() {
 
 ```ts
 // utils/refreshBus.ts
-import mitt from 'mitt'
-export const refreshBus = mitt<{ refresh: void; refreshDone: string }>()
+import mitt from "mitt";
+export const refreshBus = mitt<{ refresh: void; refreshDone: string }>();
 ```
 
 ```ts
 // 각 컴포저블에서
 onMounted(() => {
-  refreshBus.on('refresh', handleRefresh)
-})
-onBeforeUnmount(() => refreshBus.off('refresh', handleRefresh))
+  refreshBus.on("refresh", handleRefresh);
+});
+onBeforeUnmount(() => refreshBus.off("refresh", handleRefresh));
 ```
 
 - ✅ **함수를 상태에 담을 필요가 없어진다.** 각 컴포넌트는 자기 리스너만 등록하면 됨 → 직렬화 이슈 원천 차단.
@@ -167,25 +167,25 @@ onBeforeUnmount(() => refreshBus.off('refresh', handleRefresh))
 ### C. Pinia Store + Action 직접 호출
 
 ```ts
-export const useRefreshStore = defineStore('refresh', () => {
-  const handlers = new Map<string, () => Promise<void>>() // store 인스턴스 내부 Map
-  const isRefreshing = ref(false)
+export const useRefreshStore = defineStore("refresh", () => {
+  const handlers = new Map<string, () => Promise<void>>(); // store 인스턴스 내부 Map
+  const isRefreshing = ref(false);
 
   function register(key: string, fn: () => Promise<void>) {
-    if (import.meta.server) return
-    handlers.set(key, fn)
+    if (import.meta.server) return;
+    handlers.set(key, fn);
   }
 
   async function refreshAll() {
-    isRefreshing.value = true
+    isRefreshing.value = true;
     try {
-      await Promise.all([...handlers.values()].map(fn => fn()))
+      await Promise.all([...handlers.values()].map((fn) => fn()));
     } finally {
-      isRefreshing.value = false
+      isRefreshing.value = false;
     }
   }
-  return { register, refreshAll, isRefreshing }
-})
+  return { register, refreshAll, isRefreshing };
+});
 ```
 
 - ✅ Pinia의 `state`만 SSR 직렬화 대상이고, **`setup store` 내부의 일반 변수(`Map`, 클로저 등)는 직렬화 대상이 아니다.** 함수도 store 내부에 안전하게 보관 가능.
@@ -202,13 +202,13 @@ export const useRefreshStore = defineStore('refresh', () => {
 
 ### 📊 비교 정리
 
-| 방식 | SSR 직렬화 안전 | 흐름 추적 용이성 | 도입 비용 | 추천도 |
-|---|---|---|---|---|
-| `useState` + 함수 등록 (현재) | ❌ (가드 필요) | 보통 | 낮음 | △ (가드로 봉합) |
-| 모듈 스코프 `ref` | ⚠️ (요청 간 공유 주의) | 보통 | 낮음 | △ |
-| Event Bus | ✅ | ❌ 약함 | 낮음 | ○ (소규모) |
-| **Pinia Setup Store** | ✅ | ✅ 강함 | 낮음(이미 사용 중) | ◎ |
-| `provide` / `inject` | ✅ | 보통 | 낮음 | △ (범위 제약) |
+| 방식                          | SSR 직렬화 안전        | 흐름 추적 용이성 | 도입 비용          | 추천도          |
+| ----------------------------- | ---------------------- | ---------------- | ------------------ | --------------- |
+| `useState` + 함수 등록 (현재) | ❌ (가드 필요)         | 보통             | 낮음               | △ (가드로 봉합) |
+| 모듈 스코프 `ref`             | ⚠️ (요청 간 공유 주의) | 보통             | 낮음               | △               |
+| Event Bus                     | ✅                     | ❌ 약함          | 낮음               | ○ (소규모)      |
+| **Pinia Setup Store**         | ✅                     | ✅ 강함          | 낮음(이미 사용 중) | ◎               |
+| `provide` / `inject`          | ✅                     | 보통             | 낮음               | △ (범위 제약)   |
 
 > **잠정 결론:** 현재는 가드로 봉합했지만, 후속 리팩토링 시 **Pinia setup store 내부 `Map`으로 핸들러를 보관하고, `isRefreshing`만 reactive state로 노출**하는 형태로 옮기는 것이 가장 깔끔할 듯하다.
 
