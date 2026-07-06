@@ -2,8 +2,8 @@
 title: aspect-ratio Troubleshooting on Safari
 published: 2026-04-23
 tags: [Browser, Troubleshooting, Image, Javascript, Safari, Chrome]
-category: Browser
-series: Troubleshooting Notes
+category: Troubleshooting
+series: Troubleshooting & Refactoring Notes
 draft: false
 ---
 
@@ -91,6 +91,7 @@ flowchart TB
 ```
 
 > 출처:
+>
 > - WebKit: [`WebCore/rendering/RenderBox.cpp` — `shouldComputeLogicalHeightFromAspectRatio()`](https://trac.webkit.org/changeset/271061/webkit)
 > - Blink: [`blink/renderer/core/layout/`](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/renderer/core/layout/)
 
@@ -126,10 +127,10 @@ flex (stretch) → flex (stretch) → flex (stretch) → div height 결정
 
 ### 3. Safari vs Chrome의 해석 차이
 
-| | Chrome (Blink) | Safari (WebKit) |
-|---|---|---|
+|                                                | Chrome (Blink)                          | Safari (WebKit)                                          |
+| ---------------------------------------------- | --------------------------------------- | -------------------------------------------------------- |
 | `height`가 명시된 상태에서 `aspect-ratio` 처리 | aspect-ratio를 **힌트**로 사용해 재계산 | 명시된 `height`를 **확정값**으로 간주, aspect-ratio 무시 |
-| stretch로 전파된 높이 처리 | aspect-ratio가 있으면 높이를 재계산 | 전파된 height를 그대로 확정값으로 사용 |
+| stretch로 전파된 높이 처리                     | aspect-ratio가 있으면 높이를 재계산     | 전파된 height를 그대로 확정값으로 사용                   |
 
 **Chrome은 aspect-ratio가 있으면 height를 재계산하고, Safari는 height가 있으면 aspect-ratio를 무시한다.**
 
@@ -192,7 +193,7 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover; /* 비율 유지하며 크롭, aspect-ratio 대체 */
-  display: block;    /* inline 기본값의 baseline 공백 제거 */
+  display: block; /* inline 기본값의 baseline 공백 제거 */
   /* aspect-ratio 제거 */
 }
 ```
@@ -224,13 +225,13 @@ img {
 
 ## 수정 전/후 비교
 
-| | 수정 전 | 수정 후 |
-|---|---|---|
-| 비율 제어 위치 | `img` (자식) | 제거 / wrapper로 이동 |
-| Safari 증상 | 렌더링 중 fluctuation → 인접 요소 튕김 | 없음 |
-| 저속 네트워크 | 증상 심화 (이미지 latency에 비례) | 무관 |
-| Chrome/Firefox 동작 | 정상 (관대한 해석) | 정상 |
-| 이미지 크롭 방식 | 미정의 | `object-fit: cover` |
+|                     | 수정 전                                | 수정 후               |
+| ------------------- | -------------------------------------- | --------------------- |
+| 비율 제어 위치      | `img` (자식)                           | 제거 / wrapper로 이동 |
+| Safari 증상         | 렌더링 중 fluctuation → 인접 요소 튕김 | 없음                  |
+| 저속 네트워크       | 증상 심화 (이미지 latency에 비례)      | 무관                  |
+| Chrome/Firefox 동작 | 정상 (관대한 해석)                     | 정상                  |
+| 이미지 크롭 방식    | 미정의                                 | `object-fit: cover`   |
 
 ---
 
@@ -246,13 +247,13 @@ img {
 // Chakra UI Image — aspectRatio prop 전달 시 내부 렌더링 구조
 <Box
   position="relative"
-  aspectRatio={ratio}     // ← wrapper Box에만 aspect-ratio 적용
+  aspectRatio={ratio} // ← wrapper Box에만 aspect-ratio 적용
   overflow="hidden"
 >
   <img
     style={{
       position: "absolute",
-      inset: 0,             // top/right/bottom/left: 0
+      inset: 0, // top/right/bottom/left: 0
       width: "100%",
       height: "100%",
       objectFit: "cover",
@@ -280,13 +281,13 @@ img {
 
 ### 세 접근 비교
 
-| | 직접 `aspect-ratio` (문제 케이스) | Next.js `<Image>` | Chakra UI `<Image>` |
-|---|---|---|---|
-| 비율 제어 위치 | `img` 직접 | width + height 명시 | wrapper `Box` |
-| `img` position | flex child (static) | static / absolute | `absolute` (inset: 0) |
-| flex stretch 영향 | 받음 (Safari 문제 원인) | 없음 | 없음 |
-| Safari 안전성 | 불안정 | 안정 | 안정 |
-| 공통 원칙 | — | `img`에 `aspect-ratio` 주지 않음 | `img`에 `aspect-ratio` 주지 않음 |
+|                   | 직접 `aspect-ratio` (문제 케이스) | Next.js `<Image>`                | Chakra UI `<Image>`              |
+| ----------------- | --------------------------------- | -------------------------------- | -------------------------------- |
+| 비율 제어 위치    | `img` 직접                        | width + height 명시              | wrapper `Box`                    |
+| `img` position    | flex child (static)               | static / absolute                | `absolute` (inset: 0)            |
+| flex stretch 영향 | 받음 (Safari 문제 원인)           | 없음                             | 없음                             |
+| Safari 안전성     | 불안정                            | 안정                             | 안정                             |
+| 공통 원칙         | —                                 | `img`에 `aspect-ratio` 주지 않음 | `img`에 `aspect-ratio` 주지 않음 |
 
 ---
 
@@ -306,9 +307,15 @@ flex-container (align-items: stretch — 기본값)
 ```
 
 ```css
-.flex-container { display: flex; /* align-items 미지정 → stretch */ }
-.icon-wrapper   { width: 44px; /* height 없음 → stretch로 결정 */ }
-img             { aspect-ratio: 1; /* Safari에서 무시됨 */ }
+.flex-container {
+  display: flex; /* align-items 미지정 → stretch */
+}
+.icon-wrapper {
+  width: 44px; /* height 없음 → stretch로 결정 */
+}
+img {
+  aspect-ratio: 1; /* Safari에서 무시됨 */
+}
 ```
 
 ### 2단계: flex-start 적용 — stretch 해제
@@ -321,9 +328,19 @@ flex-container (align-items: flex-start)
 ```
 
 ```css
-.flex-container { display: flex; align-items: flex-start; }
-.icon-wrapper   { width: 44px; height: 44px; }
-img             { width: 100%; height: 100%; object-fit: cover; }
+.flex-container {
+  display: flex;
+  align-items: flex-start;
+}
+.icon-wrapper {
+  width: 44px;
+  height: 44px;
+}
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 ```
 
 ### 3단계: position: absolute 분리 — Chakra UI 방식
@@ -341,7 +358,7 @@ flex-container
 ```css
 .icon-wrapper {
   width: 44px;
-  aspect-ratio: 1;    /* wrapper에서 비율 제어 */
+  aspect-ratio: 1; /* wrapper에서 비율 제어 */
   position: relative;
   border-radius: 50%;
   overflow: hidden;
