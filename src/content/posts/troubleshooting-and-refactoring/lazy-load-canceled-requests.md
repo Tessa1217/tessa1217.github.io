@@ -75,7 +75,7 @@ HAR에서 같은 이미지(약 152KB)가 30초 안에 **두 번 모두 풀 다�
 
 ### 원인 ③ — scroll-top 언마운트 취소 (정상 동작)
 
-scroll-top 버튼은 페이지 상단으로 순간 이동하면서 중간 행들을 언마운트시킨다. 이때 로드 중이던 이미지 요청이 abort되어 `net::ERR_ABORTED`로 찍힌다. HAR의 initiator 체인은 `handleIntersect → loadImage → new Image()`였고, 상당수는 큐(blocked) 상태에서 전송도 되기 전에 취소됐다.
+scroll-top 버튼은 Virtual Scroll이 적용된 페이지 상단으로 순간 이동하면서 중간 행들을 언마운트시킨다. 이때 로드 중이던 이미지 요청이 abort되어 `net::ERR_ABORTED`로 찍힌다. HAR의 initiator 체인은 `handleIntersect → loadImage → new Image()`였고, 상당수는 큐(blocked) 상태에서 전송도 되기 전에 취소됐다.
 
 이것은 **고쳐야 할 문제가 아니다**. 화면을 떠난 행의 이미지를 끝까지 받는 것이야말로 대역폭 낭비이고, lazy loading을 쓰는 이유와 정반대다. 언마운트 경로는 내부적으로 destroy 가드가 있어 `onError` 콜백이나 콘솔 경고도 내지 않는다 — 남는 것은 devtools의 `(canceled)` 표기뿐이며, 이는 무해하다.
 
