@@ -1,6 +1,7 @@
 ---
 title: Image Component Refactoring — flex 의존성 제거와 CSS 크로스페이드
 published: 2026-07-06
+updated: 2026-07-22
 tags: [Vue, Component, Image, CSS, Animation, Performance, Safari, Refactoring]
 category: Refactoring
 series: Troubleshooting & Refactoring Notes
@@ -299,11 +300,15 @@ preload가 완료되면 화면의 `<img>` 엘리먼트에 같은 `src`를 직접
 - **페이드 애니메이션 on/off 옵션** — 크로스페이드가 항상 정답은 아니다. 아이콘처럼 작고 즉각적으로 떠야 하는 이미지에는 전환 효과가 오히려 거슬릴 수 있어서, 애니메이션을 끌 수 있는 옵션을 검토하고 있다.
 - **placeholder 정책 다듬기** — placeholder가 굳이 필요 없는 사용처에서도 기본값이 노출되는 케이스가 있다. 기본값과 노출 조건은 실제 사용처 피드백을 받으며 조정해 나갈 예정이다.
 
+**(2026-07-22 추가)** 배포 이후 운영에서 lazy 로드 시 `(canceled)` 요청이 대량 발생하는 이슈가 올라왔는데, 조사해 보니 이 글에서 "캐시 히트 동기 감지"로 소개한 최적화가 실어 온 회귀가 세 원인 중 하나였다. 그 원인 분해와 수정은 [3편](/posts/troubleshooting-and-refactoring/lazy-load-canceled-requests/)에, 조사 중 함께 드러난 CDN 캐시 정책 문제와 적용·검증 기록은 [4편](/posts/troubleshooting-and-refactoring/image-cdn-cache-control/)에 이어진다.
+
 ---
 
 ## 관련 자료
 
 - [1편 — aspect-ratio Troubleshooting on Safari](/posts/troubleshooting-and-refactoring/aspect-ratio-troubleshooting/)
+- [3편 — 이미지 Lazy Load (canceled) 대량 발생: 세 원인 분해와 캐시 프로브 자기취소 수정](/posts/troubleshooting-and-refactoring/lazy-load-canceled-requests/)
+- [4편 — 브라우저 disk cache가 동작하지 않던 이유: stale-on-arrival과 CDN Cache-Control 적용](/posts/troubleshooting-and-refactoring/image-cdn-cache-control/)
 - [MDN — aspect-ratio](https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio)
 - [MDN — HTMLImageElement.complete](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/complete)
 - [web.dev — Cumulative Layout Shift (CLS)](https://web.dev/articles/cls)
