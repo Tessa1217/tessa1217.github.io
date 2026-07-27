@@ -1,6 +1,7 @@
 ---
 title: aspect-ratio Troubleshooting on Safari
 published: 2026-04-23
+updated: 2026-07-22
 tags: [Browser, Troubleshooting, Image, Javascript, Safari, Chrome]
 category: Troubleshooting
 series: Troubleshooting & Refactoring Notes
@@ -388,6 +389,7 @@ flex-A (stretch) → flex-B (stretch) → flex-C (stretch) → icon-wrapper 최�
 
 ## 관련 자료
 
+- [2편 — Image Component Refactoring: flex 의존성 제거와 CSS 크로스페이드](/posts/troubleshooting-and-refactoring/image-component-refactoring/) — 이 글의 결론("비율은 wrapper가, `img`는 채우기만")을 컴포넌트 구조로 내재화한 후속 편
 - [MDN — aspect-ratio](https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio)
 - [QuirksBlog — aspect-ratio in flex/grid context](https://www.quirksmode.org/blog/archives/2021/05/aspectratio.html)
 - [Jack Duvall's Blog — A Safari aspect-ratio CSS Bug](https://blog.duvallj.pw/posts/2024-09-14-safari-css-bug.html)
