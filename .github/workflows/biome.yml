@@ -2,9 +2,9 @@ name: Code quality
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dependencies ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, dependencies ]
 
 permissions:
   contents: read
